@@ -21,8 +21,8 @@ filter_config() {
       next
     }
     {
-      if (!($0 in list)) {
-        split($0, i, ":")
+      split($0, i, ":")
+      if (!($0 in list) && i[1] != "me.bmax.apatch") {
         printf "%s,1,0,%s,0,u:r:untrusted_app:s0\n", i[1], i[2]
       }
     }
@@ -32,7 +32,7 @@ filter_config() {
 exclude_user_app() {
   update_config "$(
     find "$user_path" -mindepth 2 -maxdepth 2 -type d 2>/dev/null |
-      awk '
+    awk '
       FNR == NR {
         pkg = $1
         uid[pkg] = $2
@@ -41,7 +41,7 @@ exclude_user_app() {
       }
       {
         n = split($0, p, "/")
-        pkg  = p[n]
+        pkg = p[n]
         sid = (p[n-1] == 0 ? "" : p[n-1])
         if (pkg in user) print pkg ":" sid uid[pkg]
       }
