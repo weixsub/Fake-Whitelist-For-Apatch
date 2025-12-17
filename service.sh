@@ -36,19 +36,14 @@ exclude_user_app() {
       FNR == NR {
         pkg = $1
         uid[pkg] = $2
-
-        if ($NF == "@system")
-          type[pkg] = "sys"
-        else
-          type[pkg] = "user"
-
+        if ($NF != "@system") user[pkg]
         next
       }
       {
         n = split($0, p, "/")
         pkg  = p[n]
         sid = (p[n-1] == 0 ? "" : p[n-1])
-        if (type[pkg] == "user") print pkg ":" sid uid[pkg]
+        if (pkg in user) print pkg ":" sid uid[pkg]
       }
     ' "$pkgs_path" - | filter_config
   )"
