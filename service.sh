@@ -1,6 +1,6 @@
 #!/system/bin/sh
 
-MODDIR="${0%/*}"
+MODDIR=${0%/*}
 
 file="$MODDIR/WeiX"
 script="$MODDIR/service.sh"
@@ -32,11 +32,10 @@ filter_config() {
 exclude_user_app() {
   update_config "$(
     find "$user_path" -mindepth 2 -maxdepth 2 -type d 2>/dev/null |
-    awk '
+      awk '
       FNR == NR {
-        pkg = $1
-        uid[pkg] = $2
-        if ($NF != "@system") user[pkg]
+        uid[$1] = $2
+        if ($NF != "@system") user[$1]
         next
       }
       {
@@ -90,6 +89,20 @@ if [ "$#" -eq 2 ]; then
   exit 0
 fi
 
+while :; do
+  status=0
+  for path in "$user_path"/*; do
+    [ -d "$path" ] || continue
+    [ -d "$path/android" ] || {
+      status=1
+      break
+    }
+  done
+  [ "$status" -eq 0 ] && break
+  sleep 6
+done
+
 exclude_user_app
 monitor_new_app
 monitor_new_user
+exit 0
